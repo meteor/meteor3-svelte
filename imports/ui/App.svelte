@@ -1,36 +1,21 @@
 <script>
   import { Meteor } from "meteor/meteor";
-  import { LinksCollection } from '../api/links';
   
-  let counter = 0;
-  const addToCounter = () => {
-    counter += 1;
-  }
-
-  // more information about $m at https://atmospherejs.com/zodern/melte#tracker-statements
-  $m: handle = Meteor.subscribe("links.all");
-  $m: subIsReady = handle.ready();
-
-  $m: links = LinksCollection.find().fetch();
+  let tasks = [
+    { text: 'This is task 1' },
+    { text: 'This is task 2' },
+    { text: 'This is task 3' },
+  ];
 </script>
 
-
 <div class="container">
-  <h1>Welcome to Meteor!</h1>
+  <header>
+    <h1>Todo List</h1>
+  </header>
 
-  <button on:click={addToCounter}>Click Me</button>
-  <p>You've pressed the button {counter} times.</p>
-
-  <h2>Learn Meteor!</h2>
-  {#if subIsReady}
-    <ul>
-      {#each links as link (link._id)}
-        <li><a href={link.url} target="_blank" rel="noreferrer">{link.title}</a></li>
-      {/each}
-    </ul>
-  {:else}
-    <div>Loading ...</div>
-  {/if}
-  <h2>Typescript ready</h2>
-  <p>Just add lang="ts" to .svelte components.</p>
+  <ul>
+    {#each tasks as task (task.text)}
+      <li>{task.text}</li>
+    {/each}
+  </ul>
 </div>
