@@ -3,6 +3,7 @@
   import { TasksCollection } from "../api/TasksCollection";
   import "/imports/api/TasksMethods";
   import Task from "./Task.svelte";
+  import Login from "./Login.svelte"; 
 
   let newTask = '';
   let hideCompleted = false;
@@ -34,6 +35,8 @@
   // Reactive incomplete count
   $m: incompleteCount = TasksCollection.find({ isChecked: { $ne: true } }).count();
   $m: incompleteDisplay = incompleteCount > 0 ? `(${incompleteCount})` : '';
+
+  $m: currentUser = Meteor.user(); // Reactive current user  
 </script>
 
 <div class="app">
@@ -46,29 +49,33 @@
   </header>
 
   <div class="main">
-    <form class="task-form" on:submit={addTask}>
-      <input type="text" placeholder="Type to add new tasks" bind:value={newTask} />
-      <button type="submit">Add Task</button>
-    </form>
+    {#if currentUser}
+      <form class="task-form" on:submit={addTask}>
+        <input type="text" placeholder="Type to add new tasks" bind:value={newTask} />
+        <button type="submit">Add Task</button>
+      </form>
 
-    <div class="filter">
-      <button on:click={toggleHideCompleted}>
-        {#if hideCompleted}
-          Show All
+      <div class="filter">
+        <button on:click={toggleHideCompleted}>
+          {#if hideCompleted}
+            Show All
+          {:else}
+            Hide Completed
+          {/if}
+        </button>
+      </div>
+
+      <ul class="tasks">
+        {#if subIsReady}
+          {#each tasks as task (task._id)}
+            <Task {task} />
+          {/each}
         {:else}
-          Hide Completed
+          <div>Loading ...</div>
         {/if}
-      </button>
-    </div>
-
-    <ul class="tasks">
-      {#if subIsReady}
-        {#each tasks as task (task._id)}
-          <Task {task} />
-        {/each}
-      {:else}
-        <div>Loading ...</div>
-      {/if}
-    </ul>
+      </ul>
+    {:else}
+      <Login />
+    {/if}
   </div>
 </div>
