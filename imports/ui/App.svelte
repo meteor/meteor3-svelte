@@ -1,7 +1,7 @@
 <script>
   import { Meteor } from "meteor/meteor";
   import { TasksCollection } from "../api/TasksCollection";
-  import '/imports/api/TasksMethods.js'; // this import in this client UI allows for optimistic execution
+  import "/imports/api/TasksMethods";
   import Task from "./Task.svelte";
 
   let newTask = '';
@@ -22,23 +22,29 @@
   $m: tasks = TasksCollection.find({}, { sort: { createdAt: -1, _id: -1 } }).fetch();
 </script>
 
-<div class="container">
+<div class="app">
   <header>
-    <h1>Todo List</h1>
+    <div class="app-bar">
+      <div class="app-header">
+        <h1>📝️ Todo List</h1>                    
+      </div>
+    </div>
   </header>
 
-  <form class="task-form" on:submit={addTask}>
-    <input type="text" placeholder="Type to add new tasks" bind:value={newTask} />
-    <button type="submit">Add Task</button>
-  </form>
+  <div class="main">
+    <form class="task-form" on:submit={addTask}>
+      <input type="text" placeholder="Type to add new tasks" bind:value={newTask} />
+      <button type="submit">Add Task</button>
+    </form>
 
-  <ul>
-    {#if subIsReady}
-      {#each tasks as task (task._id)}
-        <Task {task} />
-      {/each}
-    {:else}
-      <div>Loading ...</div>
-    {/if}
-  </ul>
+    <ul class="tasks">
+      {#if subIsReady}
+        {#each tasks as task (task._id)}
+          <Task {task} />
+        {/each}
+      {:else}
+        <div>Loading ...</div>
+      {/if}
+    </ul>
+  </div>
 </div>
