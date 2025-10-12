@@ -2,6 +2,7 @@
   import { Meteor } from "meteor/meteor";
   import { TasksCollection } from "../api/TasksCollection";
   import '/imports/api/TasksMethods.js'; // this import in this client UI allows for optimistic execution
+  import Task from "./Task.svelte";
 
   let newTask = '';
 
@@ -18,7 +19,7 @@
 
   $m: handle = Meteor.subscribe("tasks");
   $m: subIsReady = handle.ready();
-  $m: tasks = TasksCollection.find({}, { sort: { createdAt: -1 } }).fetch();
+  $m: tasks = TasksCollection.find({}, { sort: { createdAt: -1, _id: -1 } }).fetch();
 </script>
 
 <div class="container">
@@ -34,7 +35,7 @@
   <ul>
     {#if subIsReady}
       {#each tasks as task (task._id)}
-        <li>{task.text}</li>
+        <Task {task} />
       {/each}
     {:else}
       <div>Loading ...</div>
