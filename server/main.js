@@ -15,6 +15,8 @@ Meteor.startup(async () => {
     });
   }
 
+  const user = await Accounts.findUserByUsername(SEED_USERNAME);
+
   if ((await TasksCollection.find().countAsync()) === 0) {
     [
       "First Task",
@@ -28,6 +30,7 @@ Meteor.startup(async () => {
       Meteor.callAsync("tasks.insert", {
         text: taskName,
         createdAt: new Date(),
+        userId: user._id
       });      
     });
   }

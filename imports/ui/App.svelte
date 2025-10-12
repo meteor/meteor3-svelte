@@ -26,17 +26,19 @@
   $m: handle = Meteor.subscribe("tasks");
   $m: subIsReady = handle.ready();
 
-  // Reactive tasks with filter
-  $m: tasks = TasksCollection.find(
-    hideCompleted ? { isChecked: { $ne: true } } : {},
-    { sort: { createdAt: -1, _id: -1 } }
-  ).fetch();
-
-  // Reactive incomplete count
-  $m: incompleteCount = TasksCollection.find({ isChecked: { $ne: true } }).count();
-  $m: incompleteDisplay = incompleteCount > 0 ? `(${incompleteCount})` : '';
-
   $m: currentUser = Meteor.user(); // Reactive current user  
+
+  $m: tasks = currentUser // [!code highlight]
+    ? TasksCollection.find( // [!code highlight]
+        hideCompleted ? { isChecked: { $ne: true } } : {}, // [!code highlight]
+        { sort: { createdAt: -1, _id: -1 } } // [!code highlight]
+      ).fetch() // [!code highlight]
+    : []; // [!code highlight]
+
+  $m: incompleteCount = currentUser // [!code highlight]
+    ? TasksCollection.find({ isChecked: { $ne: true } }).count() // [!code highlight]
+    : 0; // [!code highlight]
+  $m: incompleteDisplay = incompleteCount > 0 ? `(${incompleteCount})` : '';  
 </script>
 
 <div class="app">
@@ -50,6 +52,10 @@
 
   <div class="main">
     {#if currentUser}
+      <div class="user" on:click={() => Meteor.logout()}>
+        {currentUser.username} 🚪
+      </div>
+
       <form class="task-form" on:submit={addTask}>
         <input type="text" placeholder="Type to add new tasks" bind:value={newTask} />
         <button type="submit">Add Task</button>
