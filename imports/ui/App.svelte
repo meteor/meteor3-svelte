@@ -1,11 +1,10 @@
 <script>
   import { Meteor } from "meteor/meteor";
-  
-  let tasks = [
-    { text: 'This is task 1' },
-    { text: 'This is task 2' },
-    { text: 'This is task 3' },
-  ];
+  import { TasksCollection } from "../api/TasksCollection";
+
+  $m: handle = Meteor.subscribe("tasks");
+  $m: subIsReady = handle.ready();
+  $m: tasks = TasksCollection.find().fetch();
 </script>
 
 <div class="container">
@@ -14,8 +13,12 @@
   </header>
 
   <ul>
-    {#each tasks as task (task.text)}
-      <li>{task.text}</li>
-    {/each}
+    {#if subIsReady}
+      {#each tasks as task (task._id)}
+        <li>{task.text}</li>
+      {/each}
+    {:else}
+      <div>Loading ...</div>
+    {/if}
   </ul>
 </div>
