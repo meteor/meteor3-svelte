@@ -1,12 +1,53 @@
 <script>
   import { Meteor } from "meteor/meteor";
+  import { Tracker } from "meteor/tracker";
+  import { onMount, onDestroy } from "svelte";
   import { TasksCollection } from "../api/TasksCollection";
   import "/imports/api/TasksMethods";
   import Task from "./Task.svelte";
-  import Login from "./Login.svelte"; 
+  import Login from "./Login.svelte";
 
   let newTask = '';
   let hideCompleted = false;
+
+  // Reactive state
+  let handle;
+  let subIsReady = false;
+  let currentUser = null;
+  let tasks = [];
+  let incompleteCount = 0;
+
+  let computation;
+
+  $: incompleteDisplay = incompleteCount > 0 ? `(${incompleteCount})` : '';
+
+  onMount(() => {
+    handle = Meteor.subscribe("tasks");
+
+    computation = Tracker.autorun(() => {
+      subIsReady = handle.ready();
+      currentUser = Meteor.user();
+
+      if (currentUser) {
+        const filter = hideCompleted ? { isChecked: { $ne: true } } : {};
+        tasks = TasksCollection.find(filter, { sort: { createdAt: -1, _id: -1 } }).fetch();
+        incompleteCount = TasksCollection.find({ isChecked: { $ne: true } }).count();
+      } else {
+        tasks = [];
+        incompleteCount = 0;
+      }
+    });
+
+    return () => {
+      computation?.stop?.();
+      handle?.stop?.();
+    };
+  });
+
+  onDestroy(() => {
+    computation?.stop?.();
+    handle?.stop?.();
+  });
 
   async function addTask(event) {
     event.preventDefault();
@@ -22,23 +63,6 @@
   function toggleHideCompleted() {
     hideCompleted = !hideCompleted;
   }
-
-  $m: handle = Meteor.subscribe("tasks");
-  $m: subIsReady = handle.ready();
-
-  $m: currentUser = Meteor.user(); // Reactive current user  
-
-  $m: tasks = currentUser // [!code highlight]
-    ? TasksCollection.find( // [!code highlight]
-        hideCompleted ? { isChecked: { $ne: true } } : {}, // [!code highlight]
-        { sort: { createdAt: -1, _id: -1 } } // [!code highlight]
-      ).fetch() // [!code highlight]
-    : []; // [!code highlight]
-
-  $m: incompleteCount = currentUser // [!code highlight]
-    ? TasksCollection.find({ isChecked: { $ne: true } }).count() // [!code highlight]
-    : 0; // [!code highlight]
-  $m: incompleteDisplay = incompleteCount > 0 ? `(${incompleteCount})` : '';  
 </script>
 
 <div class="app">
